@@ -1,28 +1,234 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>POC for Claude</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POC for Claude Access - No Security!</title>
     <style>
-        body { font-family: monospace; padding: 20px; }
-        pre { background: #f5f5f5; padding: 15px; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+        }
+        ul { 
+            line-height: 1.6; 
+        }
+        h1 { 
+            color: #34495e; 
+        }
+        .container {
+            max-width: 800px;
+        }
+        .hidden {
+            display: none;
+        }
+        .log-display {
+            font-family: monospace; 
+            background-color: #f5f5f5; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            white-space: pre-wrap; 
+            max-height: 500px; 
+            overflow-y: auto;
+        }
+        .clean-log {
+            font-family: monospace; 
+            white-space: pre-wrap; 
+            background: #f8f9fa; 
+            padding: 20px; 
+            border: 1px solid #e9ecef;
+        }
+        a { 
+            color: #2980b9; 
+            text-decoration: none; 
+        }
+        a:hover { 
+            text-decoration: underline; 
+        }
+        .back-link {
+            color: #27ae60;
+        }
     </style>
 </head>
 <body>
-    <h1>POC Website - Plain Text</h1>
-    <pre>
-Claude Access Test
-==================
+    <div class="container">
+        <!-- 홈페이지 -->
+        <div id="home" class="page">
+            <h1>POC for Claude Access - No Security!</h1>
+            <p>홈페이지에 오신 것을 환영합니다!</p>
+            <div style="margin: 20px 0;">
+                <h3>📋 로그 시스템:</h3>
+                <ul>
+                    <li><a href="#" onclick="showPage('logs')">📊 로그 메인 페이지</a></li>
+                    <li><a href="#" onclick="showPage('logs_read_well')">🤖 브라우저 도구용 로그</a></li>
+                    <li><a href="#" onclick="showPage('logs_raw')">📝 원본 로그</a></li>
+                </ul>
+            </div>
+        </div>
 
-✅ Hosted on GitHub Pages
-✅ Plain text content
-✅ No server-side complications
-✅ Should be accessible by automated tools
+        <!-- 로그 메인 페이지 -->
+        <div id="logs" class="page hidden">
+            <h1>📊 접속 로그 시스템</h1>
+            <p>총 <strong id="log-count">0</strong>개의 로그가 기록되어 있습니다.</p>
+            
+            <div style="margin: 20px 0;">
+                <h2>📋 로그 보기 옵션:</h2>
+                <ul>
+                    <li><a href="#" onclick="showPage('logs_read_well')" style="color: #2980b9;">🤖 브라우저 도구용 (정돈된 메시지)</a> - AI/스크래핑 도구가 읽기 쉬운 형태</li>
+                    <li><a href="#" onclick="showPage('logs_raw')" style="color: #27ae60;">📝 원본 로그 (전체 정보)</a> - 시간:IP:메시지 형태</li>
+                </ul>
+            </div>
+            
+            <hr>
+            <p><a href="#" onclick="showPage('home')">🏠 홈으로 돌아가기</a></p>
+        </div>
 
-Current time: June 10, 2025
-Status: POC Active
-    </pre>
-    
-    <h2>Test Endpoints</h2>
-    <p><a href="/test.html">Test Page</a></p>
+        <!-- 브라우저 도구용 로그 -->
+        <div id="logs_read_well" class="page hidden">
+            <h1>Clean Log Messages</h1>
+            <div id="clean-logs" class="clean-log">
+                No logs available yet.
+            </div>
+            <p><a href="#" onclick="showPage('logs')" class="back-link">← Back to logs menu</a></p>
+        </div>
+
+        <!-- 원본 로그 -->
+        <div id="logs_raw" class="page hidden">
+            <h1>📝 원본 로그 (Raw Logs)</h1>
+            <p>총 <strong id="raw-log-count">0</strong>개의 로그 기록</p>
+            <p><em>형태: 시간:브라우저정보:메시지</em></p>
+            
+            <div id="raw-logs" class="log-display">
+                No logs available yet.
+            </div>
+            
+            <hr>
+            <p><a href="#" onclick="showPage('logs')">📊 로그 메뉴로 돌아가기</a> | <a href="#" onclick="showPage('home')">🏠 홈으로</a></p>
+        </div>
+
+        <!-- 404 페이지 -->
+        <div id="not_found" class="page hidden">
+            <h1 style="color: #e74c3c;">🚫 페이지를 찾을 수 없습니다</h1>
+            <p>요청하신 페이지는 존재하지 않습니다.</p>
+            <p>✅ 이 접속은 로그에 기록되었습니다.</p>
+            <hr>
+            <div style="margin: 20px 0;">
+                <p><strong>📋 이용 가능한 페이지:</strong></p>
+                <ul>
+                    <li><a href="#" onclick="showPage('home')">🏠 홈페이지</a></li>
+                    <li><a href="#" onclick="showPage('logs')">📊 로그 메인 페이지</a></li>
+                    <li><a href="#" onclick="showPage('logs_read_well')">🤖 브라우저 도구용 로그</a></li>
+                    <li><a href="#" onclick="showPage('logs_raw')">📝 원본 로그</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 로그 저장소 (localStorage 사용)
+        function getAccessLogs() {
+            const logs = localStorage.getItem('access_logs');
+            return logs ? JSON.parse(logs) : [];
+        }
+
+        function saveAccessLogs(logs) {
+            localStorage.setItem('access_logs', JSON.stringify(logs));
+        }
+
+        function logAccess(message) {
+            const timestamp = new Date().toLocaleString('sv-SE'); // YYYY-MM-DD HH:MM:SS 형식
+            const userAgent = navigator.userAgent.slice(0, 50) + '...'; // 브라우저 정보
+            const logEntry = `${timestamp}:${userAgent}:${message}`;
+            
+            const logs = getAccessLogs();
+            logs.push(logEntry);
+            saveAccessLogs(logs);
+            
+            console.log(logEntry); // 콘솔에도 출력
+            updateLogDisplays();
+        }
+
+        function updateLogDisplays() {
+            const logs = getAccessLogs();
+            
+            // 로그 개수 업데이트
+            document.getElementById('log-count').textContent = logs.length;
+            document.getElementById('raw-log-count').textContent = logs.length;
+            
+            if (logs.length === 0) {
+                document.getElementById('clean-logs').textContent = 'No logs available yet.';
+                document.getElementById('raw-logs').textContent = 'No logs available yet.';
+                return;
+            }
+            
+            // Clean logs (메시지만)
+            const messages = logs.map(log => {
+                const parts = log.split(':');
+                if (parts.length >= 3) {
+                    return parts.slice(2).join(':').trim(); // 메시지 부분만
+                }
+                return log;
+            });
+            document.getElementById('clean-logs').textContent = messages.map(msg => `- ${msg}`).join('\n');
+            
+            // Raw logs (전체)
+            document.getElementById('raw-logs').innerHTML = logs.join('<br>');
+        }
+
+        function showPage(pageId) {
+            // 모든 페이지 숨기기
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.add('hidden'));
+            
+            // 요청된 페이지 보이기
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                
+                // 로그 기록 (로그 조회 페이지들은 로깅하지 않음)
+                if (!['logs', 'logs_read_well', 'logs_raw'].includes(pageId)) {
+                    logAccess(`${pageId} page accessed`);
+                }
+            } else {
+                // 404 페이지 표시
+                document.getElementById('not_found').classList.remove('hidden');
+                logAccess(`Page not found: ${pageId}`);
+            }
+            
+            updateLogDisplays();
+        }
+
+        // 페이지 로드 시 홈페이지 표시 및 로그 기록
+        window.addEventListener('load', function() {
+            showPage('home');
+            logAccess('Home page accessed');
+        });
+
+        // URL 해시 변경 감지 (뒤로가기/앞으로가기 지원)
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.slice(1);
+            if (hash) {
+                showPage(hash);
+            } else {
+                showPage('home');
+            }
+        });
+
+        // 임의의 URL 시뮬레이션을 위한 함수
+        function simulateRandomAccess() {
+            const randomPaths = ['hello', 'my_name_is_snu', 'test', 'random_page', 'about'];
+            const randomPath = randomPaths[Math.floor(Math.random() * randomPaths.length)];
+            logAccess(randomPath);
+            updateLogDisplays();
+            alert(`무작위 경로 "${randomPath}" 접속이 로그에 기록되었습니다!`);
+        }
+
+        // 개발자 도구에서 사용할 수 있는 함수
+        window.simulateRandomAccess = simulateRandomAccess;
+        window.clearLogs = function() {
+            localStorage.removeItem('access_logs');
+            updateLogDisplays();
+            alert('모든 로그가 삭제되었습니다.');
+        };
+    </script>
 </body>
 </html>
